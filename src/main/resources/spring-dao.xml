@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        https://www.springframework.org/schema/beans/spring-beans.xsd
+    http://www.springframework.org/schema/context
+        https://www.springframework.org/schema/context/spring-context.xsd">
+
+    <!--配置读取db.properties文件的对象-->
+    <context:property-placeholder location="classpath:db.properties"/>
+    <!--创建数据库连接池对象-->
+    <bean id="ds" class="com.alibaba.druid.pool.DruidDataSource">
+       <property name="driverClassName"  value="${jdbc.driver}"/>
+       <property name="url"  value="${jdbc.url}"/>
+       <property name="username"  value="${jdbc.username}"/>
+       <property name="password"  value="${jdbc.password}"/>
+    </bean>
+    <!--通过配置FactoryBean对象实现获取SqlSession对象-->
+    <bean class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="ds"/>
+        <property name="typeAliasesPackage" value="com.briup.bean"/>
+        <!--映射文件所在的位置 mappers-->
+        <property name="mapperLocations" value="classpath:mappers/**/*.xml"/>
+        <property name="configuration" ref="configuration"/>
+    </bean>
+    <!--配置扫描映射接口所在的位置-->
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="basePackage" value="com.briup.dao"/>
+    </bean>
+    <!--
+        扩展： 实现控制台打印mybatis执行日志
+       <setting> 日志前缀 日志实现类
+        创建一个配置对象表示mybatis-config.xml文件内容
+    -->
+    <bean id="configuration" class="org.apache.ibatis.session.Configuration">
+        <!--指定打印日志的实现类log4j-->
+        <property name="logImpl" value="org.apache.ibatis.logging.log4j.Log4jImpl"/>
+    </bean>
+</beans>
+

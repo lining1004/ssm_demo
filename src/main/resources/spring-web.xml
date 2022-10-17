@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="
+        http://www.springframework.org/schema/beans
+        https://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context
+        https://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/mvc
+        https://www.springframework.org/schema/mvc/spring-mvc.xsd">
+    <!--1.开启注解-->
+    <mvc:annotation-driven>
+        <mvc:message-converters>
+            <!--配置转换器-->
+            <ref bean="httpMessageConverter"/>
+        </mvc:message-converters>
+    </mvc:annotation-driven>
+    <!--2.扫描注解-->
+<!--
+   把service对象定义在子容器中，
+   当父容器实现aop时，获取的service对象的代理对象，实现aop操作。
+
+    <context:component-scan base-package="com.briup"/>
+-->
+    <context:component-scan base-package="com.briup.web"/>
+    <!--3.返回的视图解析器-->
+    <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+        <property name="prefix" value="/WEB-INF/jsp/"/>
+        <property name="suffix" value=".jsp"/>
+        <property name="viewClass" value="org.springframework.web.servlet.view.JstlView"/>
+    </bean>
+    <!--4.配置静态资源直接访问-->
+    <mvc:default-servlet-handler/>
+
+    <!--5.配置拦截器-->
+    <mvc:interceptors>
+        <mvc:interceptor>
+            <mvc:mapping path="/**"/>
+            <bean class="com.briup.web.interceptor.TestInterceptor"/>
+        </mvc:interceptor>
+    </mvc:interceptors>
+
+    <!--6.默认视图处理器
+     当访问/form 使用默认视图控制器，返回视图和模型对象
+    -->
+    <mvc:view-controller path="/form" view-name="uploadByForm"/>
+    <mvc:view-controller path="/ajax" view-name="uploadByAjax"/>
+    <!--设置文件上传大小配置
+         必须规定名字为multipartResolver 否则无效
+    -->
+    <bean name="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+        <!--上传文件名字-->
+        <property name="defaultEncoding" value="utf-8"/>
+        <!--文件上传最大值5M 单位：字节-->
+        <property name="maxUploadSize" value="5242880"/>
+    </bean>
+    <!--设置响应字符串中默认编码格式为utf-8-->
+    <bean id="httpMessageConverter" class="org.springframework.http.converter.StringHttpMessageConverter">
+        <property name="defaultCharset" value="utf-8"/>
+    </bean>
+</beans>
+
